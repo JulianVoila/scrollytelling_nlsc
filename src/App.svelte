@@ -1,65 +1,90 @@
 <script>
-  import Example from "$components/Example.svelte";
   import data from "$data/data.js";
   console.log(data);
+
+  import { scaleLinear } from "d3-scale";
+  // import { extent } from "d3-array";
+
+  const margin = {
+    top: 20,
+    right: 20,
+    bottom: 20,
+    left: 15,
+  };
+
+  let width = 400;
+  $: innerWidth = width - (margin.left + margin.right);
+  $: xScale = scaleLinear().domain([0, 100]).range([0, innerWidth]);
+
+  // let yDomain = extent({data.hours})
+
+  let height = 400;
+  let innerHeight = width - (margin.top + margin.bottom);
+  let yScale = scaleLinear().domain([0, 60]).range([innerHeight, 0]);
+
+  import AxisX from "$components/AxisX.svelte";
+  import AxisY from "$components/AxisY.svelte";
+  import Tooltip from "$components/Tooltip.svelte";
+  import {fly} from "svelte/transition"
+
+  let hoveredData;
+  $: console.log(hoveredData); // To track what we're hovering
 </script>
 
-<main>
-  <h1>Let's make a chart 😎</h1>
-  <h2>
-    Get started by deleting all of the contents in <pre>App.svelteeeeee</pre>
-    🗑
-  </h2>
-  <Example />
-  <footer>
-    For help, <a
-      href="https://twitter.com/CL_Rothschild"
-      target="_blank"
-      rel="noopener noreferrer">DM Connor on Twitter ✉️</a
-    >
-  </footer>
-</main>
+<h1>Students who studied longer scored higher on their final exam</h1>
+<!-- Svelte each bloc -->
+<div class="chart-container" bind:clientWidth={width}>
+  <svg {width} {height}>
+    <g transform="translate({margin.left} {margin.top})">
+      <AxisX {xScale} {innerHeight} {innerWidth} />
+      <AxisY {yScale} {innerWidth} />
+      {#each data.sort((a,b) => a.grade - b.grade ) as d}
+        <!-- <p> <strong>{d.name}</strong> studied for {d.hours} hours</p> -->
+        <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+        <circle 
+          in:fly={{ x: -10, opacity: 0, duration:500}}
+          cx={xScale(d.grade)}
+          cy={yScale(d.hours)}
+          r={ hoveredData===d ? 20: 10}
+          opacity={ hoveredData ?
+          (hoveredData === d ? 1 : 0.45) : 1 }
+          fill="purple"
+          stroke="black"
+          stroke-width="1"
+          on:mouseover={() => (hoveredData = d)}
+          on:mouseleave= {() => (hoveredData = null)}
+          on:focus={() => (hoveredData = d)}
+          tabindex="0"
+        />
+      {/each}
+    </g>
+  </svg>
+  {#if hoveredData}
+    <Tooltip data={hoveredData} {xScale} {yScale} {width}/>
+  {/if}
+</div>
 
 <style>
-  main {
-    text-align: center;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: #f0f0f0;
+  :global(.tick text, .axis-title) {
+    font-weight: 400;
+    font-size: 12px;
+    fill: #8f8f8f;
   }
 
-  h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    font-weight: 700;
+  .chart-container {
+    position: relative;
   }
 
-  h2 {
-    font-size: 1.5rem;
-    color: #333;
-    margin-bottom: 2rem;
-    line-height: 1.5;
+  circle{
+    transition:  r 300ms ease, opacity  500ms ease;
+    cursor: pointer;
   }
 
-  pre {
-    padding: 1px 6px;
-    display: inline;
-    margin: 0;
-    background: #ffb7a0;
-    border-radius: 3px;
-  }
+  h1{
+    font-size: 1.45rem;
+    font-weight: 600;
+    margin: 0.75rem;
 
-  a {
-    color: #ff3e00;
-    text-decoration: inherit;
-  }
-
-  footer {
-    font-size: 1rem;
-    color: #333;
   }
 </style>
