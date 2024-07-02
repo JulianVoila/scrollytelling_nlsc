@@ -7,7 +7,7 @@
 <main>
   <h1>Let's make a chart 😎</h1>
   <h2>
-    Get started by deleting all of the contents in <pre>App.svelte</pre>
+    Get started by deleting all of the contents in <pre>App.svelteeeeee</pre>
     🗑
   </h2>
   <Example />
