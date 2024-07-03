@@ -1,4 +1,6 @@
 <script>
+    import { fade } from "svelte/transition";
+    
     export let innerWidth;
     export let yScale;
     // export let height
@@ -7,7 +9,7 @@
 
 <g class="axis y" transform="translate(0 0)">
     {#each yTicks as tick, index}
-        <g class="tick" transform="translate(0 {yScale(tick)})">
+        <g  transition:fade={{ delay:index*200}} class="tick" transform="translate(0 {yScale(tick)})">
             <line 
             x1="0"
              x2={innerWidth} 
